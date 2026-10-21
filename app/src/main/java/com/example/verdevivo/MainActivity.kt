@@ -2,13 +2,22 @@ package com.example.verdevivo
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var etCorreo: EditText
+    private lateinit var etPassword: EditText
+    private lateinit var btnIngresar: Button
+    private lateinit var dbHelper: DatabaseHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -16,10 +25,44 @@ class MainActivity : AppCompatActivity() {
 
         val tvCrearCuenta = findViewById<TextView>(R.id.tvCrearCuenta)
 
+        etCorreo = findViewById(R.id.etCorreo)
+        etPassword = findViewById(R.id.etPassword)
+        btnIngresar = findViewById(R.id.btnIngresar)
+        dbHelper = DatabaseHelper(this)
+
+
+        btnIngresar.setOnClickListener {
+            //TODO: Agregar metodo de incio de sesion
+            iniciarSesion()
+
+        }
+
         tvCrearCuenta.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
 
     }
+
+    private fun iniciarSesion() {
+        val correo = etCorreo.text.toString().trim()
+        val password = etPassword.text.toString().trim()
+
+        if (correo.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val resultado = dbHelper.iniciarSesion(correo, password)
+
+        if (resultado) {
+            Toast.makeText(this, "Bienvenido a VerdeVivo", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Toast.makeText(this, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
