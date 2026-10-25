@@ -7,8 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Crear tarjeta principal -->
-
     <ImageView
         android:id="@+id/imgFondo"
         android:layout_width="0dp"
