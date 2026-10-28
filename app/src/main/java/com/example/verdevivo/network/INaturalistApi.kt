@@ -10,7 +10,7 @@ interface INaturalistApi {
     @GET("taxa")
     fun buscarPlanta(
         @Query("q") nombre: String,
-        @Query("taxon_id") taxonId: Int = 47126 // Filtro vegetal
+        @Query("taxon_id") taxonId: Int = 47126
     ): Call<INaturalistResponse>
 
 }
