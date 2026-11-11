@@ -1,5 +1,6 @@
 package com.example.verdevivo
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -39,26 +40,28 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun obtenerPlanta(busqueda: String, contenedor: LinearLayout) {
-        RetrofitClient.api.buscarPlanta(nombre = busqueda).enqueue(object : Callback<INaturalistResponse?> {
+        RetrofitClient.api.buscarPlanta(nombre = busqueda)
+            .enqueue(object : Callback<INaturalistResponse?> {
 
-            override fun onResponse(
-                call: Call<INaturalistResponse?>,
-                response: Response<INaturalistResponse?>
-            ) {
-                val plantas = response.body()?.results ?: emptyList()
+                override fun onResponse(
+                    call: Call<INaturalistResponse?>,
+                    response: Response<INaturalistResponse?>
+                ) {
+                    val plantas = response.body()?.results ?: emptyList()
 
-                if (plantas.isNotEmpty()) {
-                    tvEstado.visibility = View.GONE
-                    mostrarPlantas(plantas, contenedor)
-                } else {
-                    Toast.makeText(this@HomeActivity, "No hay resultados", Toast.LENGTH_SHORT).show()
+                    if (plantas.isNotEmpty()) {
+                        tvEstado.visibility = View.GONE
+                        mostrarPlantas(plantas, contenedor)
+                    } else {
+                        Toast.makeText(this@HomeActivity, "No hay resultados", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<INaturalistResponse?>, t: Throwable) {
-                Toast.makeText(this@HomeActivity, "Error en el API", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onFailure(call: Call<INaturalistResponse?>, t: Throwable) {
+                    Toast.makeText(this@HomeActivity, "Error en el API", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun mostrarPlantas(plantas: List<Planta>, contenedor: LinearLayout) {
@@ -75,14 +78,30 @@ class HomeActivity : AppCompatActivity() {
                 val tvNombreComun = vistaPlanta.findViewById<TextView>(R.id.tvNombreComun)
                 val tvNombreCientifico = vistaPlanta.findViewById<TextView>(R.id.tvNombreCientifico)
 
-                tvNombreComun.text = planta.preferred_common_name ?: "Planta sin nombre"
-                tvNombreCientifico.text = planta.name ?: "Especie no identificada"
+                val nombreComun = planta.preferred_common_name ?: "Planta sin nombre"
+                val nombreCientifico = planta.name ?: "Especie no identificada"
+
+                tvNombreComun.text = nombreComun
+                tvNombreCientifico.text = nombreCientifico
 
                 Glide.with(this)
                     .load(urlFoto)
                     .centerCrop()
                     .into(imgFoto)
 
+                vistaPlanta.setOnClickListener {
+                    val intent = Intent(this@HomeActivity, PlantaDetailActivity::class.java)
+
+                    intent.putExtra("ID_PLANTA", planta.id ?: 0L)
+                    intent.putExtra("NOMBRE_COMUN", nombreComun)
+                    intent.putExtra("NOMBRE_CIENTIFICO", nombreCientifico)
+                    intent.putExtra("OBSERVACIONES_PLANTA", planta.observations_count ?: 0)
+                    intent.putExtra("FOTO_PLANTA", urlFoto)
+
+                    startActivity(intent)
+                }
+
+                // Agregar la vista inflada al contenedor
                 contenedor.addView(vistaPlanta)
             }
         }
