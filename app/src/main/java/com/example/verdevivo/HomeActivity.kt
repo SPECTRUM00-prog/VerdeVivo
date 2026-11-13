@@ -101,7 +101,6 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
 
-                // Agregar la vista inflada al contenedor
                 contenedor.addView(vistaPlanta)
             }
         }

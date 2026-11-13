@@ -2,8 +2,8 @@ package com.example.verdevivo.model
 
 data class Planta(
     val id: Long?,
-    val name: String?, // Nombre científico
-    val preferred_common_name: String?, // Nombre común
+    val name: String?, // Este es nombre científico
+    val preferred_common_name: String?, // Este es el nombre común
     val default_photo: FotoDePlanta?,
     val observations_count: Int?
 )
