@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "588644039501",
+    "project_id": "verdevivo-9a9e0",
+    "storage_bucket": "verdevivo-9a9e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588644039501:android:347f9115372f174c4dd504",
+        "android_client_info": {
+          "package_name": "com.example.verdevivo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "588644039501-h8s9epsadrtga5giigpvii6iv2b5ncck.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.verdevivo",
+            "certificate_hash": "65d378dbcc9736767c6df2e0197615951c39fcee"
+          }
+        },
+        {
+          "client_id": "588644039501-vgljluk7k8cg3as2799tecbbbes9u00f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH2MlMFPnxrEBIo-C_p4DAksEu4bEj-hk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "588644039501-vgljluk7k8cg3as2799tecbbbes9u00f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

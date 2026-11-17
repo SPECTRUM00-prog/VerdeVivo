@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EDF7EE"
+    tools:context=".NuevaPlantaActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:drawableStart="@drawable/bxs__leaf"
+                android:drawablePadding="8dp"
+                android:text="Nueva Planta"
+                android:textColor="#1B5E20"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <!-- Cuadro de Añadir Foto (Mockup 4) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardTomarFoto"
+                android:layout_width="200dp"
+                android:layout_height="180dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutPlaceholderFoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/imgFotoCapturada"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ivIconoCamara"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_nav_inicio"
+                        app:tint="#81C784" />
+
+                    <TextView
+                        android:id="@+id/tvTextoCamara"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Toca para tomar foto"
+                        android:textColor="#2E7D32"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Campo con sugerencias automáticas -->
+            <AutoCompleteTextView
+                android:id="@+id/actvNombrePlanta"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_input_color_verde"
+                android:completionThreshold="1"
+                android:hint="Nombre de la planta (ej. Tulipán)..."
+                android:inputType="text"
+                android:paddingHorizontal="16dp"
+                android:textColor="#1B5E20"
+                android:textColorHint="#81C784" />
+
+            <EditText
+                android:id="@+id/etEspeciePlanta"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="14dp"
+                android:background="@drawable/bg_input_color_verde"
+                android:hint="Especie / Tipo (ej. Tulipa)"
+                android:inputType="text"
+                android:paddingHorizontal="16dp"
+                android:textColor="#1B5E20"
+                android:textColorHint="#81C784" />
+
+            <EditText
+                android:id="@+id/etDiasRiego"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_input_color_verde"
+                android:hint="Regar cada cuántos días (ej. 4)"
+                android:inputType="number"
+                android:paddingHorizontal="16dp"
+                android:text="4"
+                android:textColor="#1B5E20"
+                android:textColorHint="#81C784" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnGuardarPlanta"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_button_verde"
+                android:text="Guardar en Mi Jardín"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
