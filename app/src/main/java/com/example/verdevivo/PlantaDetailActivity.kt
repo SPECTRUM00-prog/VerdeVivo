@@ -20,6 +20,7 @@ class PlantaDetailActivity : AppCompatActivity() {
     private lateinit var btnFavorito: ImageButton
 
     private lateinit var dbHelper: DatabaseHelper
+
     private var plantaFavorita = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,13 +28,13 @@ class PlantaDetailActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_planta_detail)
 
+        dbHelper = DatabaseHelper(this)
+
         imgFotoDetalle = findViewById(R.id.imgFotoDetalle)
         tvNombrePlantaDetalle = findViewById(R.id.tvNombrePlantaDetalle)
         tvEspeciePlantaDetalle = findViewById(R.id.tvEspeciePlantaDetalle)
         tvDetallePlanta = findViewById(R.id.tvDetallePlanta)
         btnFavorito = findViewById(R.id.btnFavorito)
-
-        dbHelper = DatabaseHelper(this)
 
         mostrarInformacionPlanta()
 
@@ -44,7 +45,9 @@ class PlantaDetailActivity : AppCompatActivity() {
         }
     }
 
+    //Metodo para obtener toda la informacion
     private fun mostrarInformacionPlanta() {
+
         val idPlanta = intent.getLongExtra("ID_PLANTA", 0L)
         val nombreComun = intent.getStringExtra("NOMBRE_COMUN") ?: "Planta sin nombre"
         val nombreCientifico = intent.getStringExtra("NOMBRE_CIENTIFICO") ?: "Especie no identificada"
@@ -59,18 +62,18 @@ class PlantaDetailActivity : AppCompatActivity() {
             "Guardada en Mi Jardín"
         }
 
-        if (imagen.isNotEmpty()) {
-            Glide.with(this)
-                .load(imagen)
-                .centerCrop()
-                .placeholder(R.drawable.bxs__leaf)
-                .into(imgFotoDetalle)
-        } else {
-            imgFotoDetalle.setImageResource(R.drawable.bxs__leaf)
+        Glide.with(this)
+            .load(imagen)
+            .centerCrop()
+            .placeholder(R.drawable.bxs__leaf)
+            .into(imgFotoDetalle)
+
+        //Validacion para verificar si la planta es favorita o no
+        if (idPlanta != 0L) {
+            plantaFavorita = dbHelper.plantaEstaGuardada(idPlanta)
         }
 
-        // Revisar si ya está en SQLite
-        plantaFavorita = dbHelper.plantaEstaGuardada(idPlanta)
+        //Pintar el icono inicial correspondiente
         if (plantaFavorita) {
             btnFavorito.setImageResource(R.drawable.ic_guardado_activo)
         } else {
@@ -78,21 +81,38 @@ class PlantaDetailActivity : AppCompatActivity() {
         }
 
         btnFavorito.setOnClickListener {
-            if (!plantaFavorita) {
-                val guardada = dbHelper.guardarPlanta(idPlanta, nombreComun, nombreCientifico, imagen)
-                if (guardada) {
-                    plantaFavorita = true
-                    btnFavorito.setImageResource(R.drawable.ic_guardado_activo)
-                    Toast.makeText(this, "$nombreComun guardada en favoritos", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                val eliminada = dbHelper.eliminarPlanta(idPlanta)
-                if (eliminada) {
-                    plantaFavorita = false
+
+            if (plantaFavorita) {
+
+                val eliminado = dbHelper.eliminarPlanta(idPlanta)
+
+                //Validar que la eliminacion sea exitosa
+                if (eliminado) {
+                    plantaFavorita = !plantaFavorita
                     btnFavorito.setImageResource(R.drawable.ic_guardar_bd)
-                    Toast.makeText(this, "$nombreComun eliminada de favoritos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Planta $nombreComun eliminada de favoritos", Toast.LENGTH_SHORT).show()
                 }
+
+            } else {
+
+                val guardado = dbHelper.guardarPlanta(
+                    idPlanta = idPlanta,
+                    nombreComun = nombreComun,
+                    nombreCientifico = nombreCientifico,
+                    fotoUrl = imagen
+                )
+
+                //Validar que el registro sea exitoso
+                if (guardado) {
+                    plantaFavorita = !plantaFavorita
+                    btnFavorito.setImageResource(R.drawable.ic_guardado_activo)
+                    Toast.makeText(this, "Planta $nombreComun agregada a favoritos", Toast.LENGTH_SHORT).show()
+                }
+
             }
+
         }
+
     }
+
 }
