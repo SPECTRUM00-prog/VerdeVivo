@@ -18,92 +18,123 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
     context,
     DATABASE_NAME,
     null,
-    DATABASE_VERSION
+    DATABASE_VERSION,
 ) {
 
     companion object {
         private const val DATABASE_NAME = "verdevivo.db"
         private const val DATABASE_VERSION = 2
 
-        // Tabla usuarios
         private const val TABLE_USUARIOS = "usuarios"
         private const val COL_ID = "id"
         private const val COL_NOMBRE = "nombre"
         private const val COL_CORREO = "correo"
         private const val COL_PASSWORD = "password"
 
-        // Tabla jardin
-        private const val TABLE_JARDIN = "jardin"
-        private const val COL_JARDIN_ID = "id"
-        private const val COL_ID_PLANTA = "id_planta"
-        private const val COL_NOMBRE_COMUN = "nombre_comun"
-        private const val COL_NOMBRE_CIENTIFICO = "nombre_cientifico"
-        private const val COL_FOTO_URL = "foto_url"
-        private const val COL_DIAS_RIEGO = "dias_riego"
-    }
+        const val TABLE_JARDIN = "jardin"
+        const val COL_JARDIN_ID = "id"
+        const val COL_ID_PLANTA = "id_planta"
+        const val COL_NOMBRE_COMUN = "nombre_comun"
+        const val COL_NOMBRE_CIENTIFICO = "nombre_cientifico"
+        const val COL_FOTO_URL = "foto_url"
+        const val COL_DIAS_RIEGO = "dias_riego"
 
-    override fun onCreate(db: SQLiteDatabase?) {
-        val crearTablaUsuarios = """
-            CREATE TABLE IF NOT EXISTS $TABLE_USUARIOS (
+        //Crear tabla de usuarios
+        private const val CREATE_TABLE_USUARIOS = """
+            CREATE TABLE $TABLE_USUARIOS (
                 $COL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COL_NOMBRE TEXT NOT NULL,
                 $COL_CORREO TEXT NOT NULL UNIQUE,
                 $COL_PASSWORD TEXT NOT NULL
             )
-        """.trimIndent()
-        db?.execSQL(crearTablaUsuarios)
+        """
 
-        crearTablaJardin(db)
-    }
-
-    private fun crearTablaJardin(db: SQLiteDatabase?) {
-        val crearTablaJardin = """
-            CREATE TABLE IF NOT EXISTS $TABLE_JARDIN (
+        //Crear tabla de favoritos
+        private const val CREATE_TABLE_JARDIN = """
+            CREATE TABLE $TABLE_JARDIN (
                 $COL_JARDIN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COL_ID_PLANTA INTEGER NOT NULL UNIQUE,
+                $COL_ID_PLANTA INTEGER UNIQUE NOT NULL,
                 $COL_NOMBRE_COMUN TEXT NOT NULL,
-                $COL_NOMBRE_CIENTIFICO TEXT NOT NULL,
-                $COL_FOTO_URL TEXT NOT NULL,
+                $COL_NOMBRE_CIENTIFICO TEXT,
+                $COL_FOTO_URL TEXT,
                 $COL_DIAS_RIEGO INTEGER DEFAULT 4
             )
-        """.trimIndent()
-        db?.execSQL(crearTablaJardin)
+        """
     }
 
+    //METODO PARA CREAR LA BASE DE DATOS
+    override fun onCreate(db: SQLiteDatabase?) {
+        //Crear tabla de SQL
+        db?.execSQL(CREATE_TABLE_USUARIOS)
+        db?.execSQL(CREATE_TABLE_JARDIN)
+    }
+
+    //METODO PARA ACTUALIZAR LA BASE DE DATOS
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        //Verificar que la version sea menor a 2
         if (oldVersion < 2) {
-            crearTablaJardin(db)
+            db?.execSQL(CREATE_TABLE_JARDIN)
         }
     }
 
-    // --- METODOS DE USUARIOS ---
+    //METODO PARA INSERTAR REGISTRO
     fun registrarUsuario(nombre: String, correo: String, password: String): Boolean {
+        //Crear variable para que la base de datos se pueda modificar
         val db = writableDatabase
+
+        //Crear variable para recibir los datos que escribe el usuario
         val datos = ContentValues().apply {
             put(COL_NOMBRE, nombre)
             put(COL_CORREO, correo)
             put(COL_PASSWORD, password)
         }
+
+        //Insertar datos en la tabla
         val resultado = db.insert(TABLE_USUARIOS, null, datos)
+
+        //Cerrar conexion con la BD
+        db.close()
+
+        //Comparar el valor del resultado de la insercion y regresarlo como boolean
         return resultado != -1L
     }
 
+    //Metodo para consultar a un usuario
     fun iniciarSesion(correo: String, password: String): Boolean {
+        //Crear variable para que la base de datos se pueda leer
         val db = readableDatabase
+
+        //Crear variable para realizar la consulta
         val query_sql = """
             SELECT * FROM $TABLE_USUARIOS
             WHERE $COL_CORREO = ? AND $COL_PASSWORD = ?
         """.trimIndent()
 
-        val cursor = db.rawQuery(query_sql, arrayOf(correo, password))
-        val usuarioEncontrado = cursor.moveToFirst()
+        //Crear cursor para recorrer la informacion
+        val cursor = db.rawQuery(
+            query_sql, arrayOf(correo, password)
+        )
+
+        //Crear variable de tipo boolean que permita saber si el cursor encontro un registro
+        val usuarioEncontrado = cursor.count > 0
+
         cursor.close()
+        db.close()
+
         return usuarioEncontrado
     }
 
-    // --- METODOS DE MI JARDIN ---
-    fun guardarPlanta(idPlanta: Long, nombreComun: String, nombreCientifico: String, fotoUrl: String, diasRiego: Int = 4): Boolean {
+    //METODO PARA REGISTRAR INFORMACIÓN PROVENIENTE DEL API
+    fun guardarPlanta(
+        idPlanta: Long,
+        nombreComun: String,
+        nombreCientifico: String,
+        fotoUrl: String,
+        diasRiego: Int = 4
+    ): Boolean {
+        //Declarar uso de la BD
         val db = writableDatabase
+
         val datos = ContentValues().apply {
             put(COL_ID_PLANTA, idPlanta)
             put(COL_NOMBRE_COMUN, nombreComun)
@@ -111,43 +142,58 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             put(COL_FOTO_URL, fotoUrl)
             put(COL_DIAS_RIEGO, diasRiego)
         }
-        val resultado = db.insert(TABLE_JARDIN, null, datos)
+
+        //Insercion en la tabla
+        val resultado = db.insertWithOnConflict(
+            TABLE_JARDIN,
+            null,
+            datos,
+            SQLiteDatabase.CONFLICT_IGNORE
+        )
+
         return resultado != -1L
     }
 
+    //METODO PARA ELIMINAR UN REGISTRO
     fun eliminarPlanta(idPlanta: Long): Boolean {
         val db = writableDatabase
-        val borradas = db.delete(TABLE_JARDIN, "$COL_ID_PLANTA = ?", arrayOf(idPlanta.toString()))
-        return borradas > 0
+
+        val filasAfectadas = db.delete(
+            TABLE_JARDIN,
+            "$COL_ID_PLANTA = ?",
+            arrayOf(idPlanta.toString())
+        )
+        return filasAfectadas > 0
     }
 
+    //Metodo para verificar que un registro existe
     fun plantaEstaGuardada(idPlanta: Long): Boolean {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            "SELECT * FROM $TABLE_JARDIN WHERE $COL_ID_PLANTA = ?",
+            "SELECT $COL_JARDIN_ID FROM $TABLE_JARDIN WHERE $COL_ID_PLANTA = ?",
             arrayOf(idPlanta.toString())
         )
-        val existe = cursor.moveToFirst()
+        val existe = cursor.count > 0
         cursor.close()
         return existe
     }
 
+    //Metodo para obtener las plantas guardadas en Mi Jardín
     fun obtenerPlantasJardin(): List<PlantaJardin> {
         val lista = mutableListOf<PlantaJardin>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_JARDIN ORDER BY $COL_JARDIN_ID DESC", null)
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_JARDIN", null)
 
-        if (cursor.moveToFirst()) {
-            do {
-                val idPlanta = cursor.getLong(cursor.getColumnIndexOrThrow(COL_ID_PLANTA))
-                val nombreComun = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOMBRE_COMUN))
-                val nombreCientifico = cursor.getString(cursor.getColumnIndexOrThrow(COL_NOMBRE_CIENTIFICO))
-                val fotoUrl = cursor.getString(cursor.getColumnIndexOrThrow(COL_FOTO_URL))
-                val diasRiego = cursor.getInt(cursor.getColumnIndexOrThrow(COL_DIAS_RIEGO))
+        while (cursor.moveToNext()) {
+            val idPlanta = cursor.getLong(1)
+            val nombreComun = cursor.getString(2)
+            val especie = cursor.getString(3)
+            val fotoUrl = cursor.getString(4)
+            val diasRiego = cursor.getInt(5)
 
-                lista.add(PlantaJardin(idPlanta, nombreComun, nombreCientifico, fotoUrl, diasRiego))
-            } while (cursor.moveToNext())
+            lista.add(PlantaJardin(idPlanta, nombreComun, especie, fotoUrl, diasRiego))
         }
+
         cursor.close()
         return lista
     }
